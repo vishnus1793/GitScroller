@@ -145,18 +145,7 @@ export const FilterBar = ({
           </div>
         </div>
 
-        {/* Active Filters Display */}
-        <div className="flex items-center space-x-2 text-sm opacity-70">
-          {language && (
-            <span className={`px-2 py-1 rounded ${darkMode ? 'bg-blue-900/30' : 'bg-blue-100'
-              }`}>
-              {language}
-            </span>
-          )}
-          <span>
-            {SORT_OPTIONS.find(opt => opt.value === sortBy)?.label}
-          </span>
-        </div>
+      
       </div>
     </div>
   );
