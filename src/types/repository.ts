@@ -32,4 +32,5 @@ export interface FetchReposParams {
   language?: string;
   sort?: string;
   order?: 'asc' | 'desc';
+  query?: string;
 }

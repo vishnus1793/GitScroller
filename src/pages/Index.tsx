@@ -17,6 +17,8 @@ const Index = () => {
   const [hasMore, setHasMore] = useState(true);
   const [language, setLanguage] = useState('');
   const [sortBy, setSortBy] = useState('stars');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSearchQuery, setActiveSearchQuery] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const { toast } = useToast();
 
@@ -31,6 +33,7 @@ const Index = () => {
         page: pageNum,
         language,
         sort: sortBy,
+        query: searchQuery,
         per_page: 10
       });
 
@@ -56,14 +59,14 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, language, sortBy, toast]);
+  }, [loading, language, sortBy, searchQuery, toast]);
 
   useEffect(() => {
     setRepos([]);
     setPage(1);
     setHasMore(true);
     loadRepos(1, true);
-  }, [language, sortBy]);
+  }, [language, sortBy, searchQuery]);
 
   const handleLoadMore = () => {
     if (!loading && hasMore) {
@@ -126,8 +129,16 @@ const Index = () => {
         <FilterBar
           language={language}
           sortBy={sortBy}
+          searchQuery={searchQuery}
           onLanguageChange={setLanguage}
           onSortChange={setSortBy}
+          onSearchChange={setSearchQuery}
+          onSearchSubmit={() => {
+            setRepos([]);
+            setPage(1);
+            setHasMore(true);
+            loadRepos(1, true);
+          }}
           darkMode={darkMode}
         />
       </header>

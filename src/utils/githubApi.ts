@@ -13,11 +13,12 @@ export const fetchTrendingRepos = async (params: FetchReposParams = {}): Promise
     per_page = 10,
     language = '',
     sort = 'stars',
-    order = 'desc'
+    order = 'desc',
+    query: searchQuery = ''
   } = params;
 
   // Create cache key
-  const cacheKey = `${page}-${per_page}-${language}-${sort}-${order}`;
+  const cacheKey = `${page}-${per_page}-${language}-${sort}-${order}-${searchQuery}`;
   
   // Check cache first
   const cached = cache.get(cacheKey);
@@ -27,18 +28,27 @@ export const fetchTrendingRepos = async (params: FetchReposParams = {}): Promise
   }
 
   // Build query
-  let query = 'stars:>100'; // Only repos with at least 100 stars
+  let query = '';
+  
+  if (searchQuery.trim()) {
+    // If there's a search query, use it as the main search term
+    query = searchQuery.trim();
+    // Add minimum stars filter for search results
+    query += ' stars:>10';
+  } else {
+    // Default trending repos query
+    query = 'stars:>100';
+    // Add some randomness by varying the date range for trending
+    const days = Math.floor(Math.random() * 365) + 30; // Random between 30-395 days ago
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    const dateStr = date.toISOString().split('T')[0];
+    query += ` created:>${dateStr}`;
+  }
   
   if (language) {
     query += ` language:${language}`;
   }
-
-  // Add some randomness by varying the date range
-  const days = Math.floor(Math.random() * 365) + 30; // Random between 30-395 days ago
-  const date = new Date();
-  date.setDate(date.getDate() - days);
-  const dateStr = date.toISOString().split('T')[0];
-  query += ` created:>${dateStr}`;
 
   const url = new URL(`${GITHUB_API_BASE}/search/repositories`);
   url.searchParams.set('q', query);
