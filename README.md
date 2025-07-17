@@ -1,6 +1,20 @@
-# Welcome to your Lovable project
+# RepoReel 🎬
 
-## Project info
+**Discover amazing repositories with ease!**
+
+RepoReel is a modern, responsive web application that helps developers discover trending GitHub repositories. With powerful search capabilities, filtering options, and an infinite scroll feed, finding your next favorite project has never been easier.
+
+## ✨ Features
+
+- **🔍 Smart Search**: Search repositories by name, description, or topics
+- **🎯 Advanced Filtering**: Filter by programming language and sort by stars, forks, or recency
+- **📱 Responsive Design**: Beautiful UI that works on desktop, tablet, and mobile
+- **🌙 Dark Mode**: Toggle between light and dark themes
+- **♾️ Infinite Scroll**: Seamlessly load more repositories as you scroll
+- **⭐ Repository Cards**: Rich cards showing stars, forks, language, and description
+- **🚀 Fast Performance**: Optimized with caching and efficient API calls
+
+## 🎯 Live Demo
 
 **URL**: https://lovable.dev/projects/8ce5895f-014a-4dcf-9b00-6ac3a3dcaba5
 
@@ -50,25 +64,143 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## 🛠️ Technologies Used
 
-This project is built with:
+This project is built with modern web technologies:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **⚡ Vite** - Lightning fast build tool and dev server
+- **📘 TypeScript** - Type-safe JavaScript for better development experience
+- **⚛️ React** - Modern UI library with hooks and functional components
+- **🎨 Tailwind CSS** - Utility-first CSS framework for rapid styling
+- **🧩 shadcn/ui** - Beautiful, accessible UI components
+- **🔄 TanStack Query** - Powerful data fetching and caching
+- **🧭 React Router** - Client-side routing
+- **🎯 Lucide React** - Beautiful, customizable icons
 
-## How can I deploy this project?
+## 🚀 Getting Started
 
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn package manager
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd <YOUR_PROJECT_NAME>
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:5173` to see the app in action!
+
+## 📖 Usage
+
+### Search Repositories
+- Use the search bar to find repositories by name, description, or topics
+- Press Enter or click the Search button to execute your search
+- Clear your search with the X button to return to trending repos
+
+### Filter & Sort
+- **Language Filter**: Choose from popular programming languages or select "All Languages"
+- **Sort Options**: Sort by Most Stars, Most Forks, Recently Updated, or Newest
+
+### Browse & Discover
+- Scroll through the infinite feed of repositories
+- Click on repository cards to visit them on GitHub
+- Toggle dark mode with the moon/sun icon in the header
+
+## 🏗️ Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui components
+│   ├── FilterBar.tsx   # Search and filter controls
+│   ├── RepoCard.tsx    # Repository display card
+│   └── ...
+├── pages/              # Page components
+├── utils/              # Utility functions and API calls
+├── types/              # TypeScript type definitions
+└── hooks/              # Custom React hooks
+```
+
+## 🎨 Features in Detail
+
+### Smart Search
+- **Real-time search** through GitHub's repository database
+- **Intelligent filtering** with minimum star thresholds
+- **Combined search** - works alongside language and sort filters
+- **Instant results** with optimized API calls and caching
+
+### Advanced Filtering
+- **11 Popular Languages**: JavaScript, TypeScript, Python, Java, Go, Rust, C++, Swift, Kotlin, PHP
+- **4 Sort Options**: Most Stars, Most Forks, Recently Updated, Newest
+- **Visual Filter Tags**: See active filters at a glance
+
+### Modern UI/UX
+- **Responsive Design**: Seamless experience across all devices
+- **Dark/Light Mode**: System preference detection with manual toggle
+- **Smooth Animations**: Polished transitions and hover effects
+- **Accessibility**: Keyboard navigation and screen reader support
+
+## 🔧 API Integration
+
+RepoReel integrates with the GitHub Search API to provide:
+- **Rate Limiting**: Smart caching to respect API limits
+- **Error Handling**: Graceful fallbacks and user feedback
+- **Performance**: Optimized queries with pagination
+- **Real-time Data**: Fresh repository information
+
+## 🚀 Deployment
+
+### Quick Deploy with Lovable
 Simply open [Lovable](https://lovable.dev/projects/8ce5895f-014a-4dcf-9b00-6ac3a3dcaba5) and click on Share -> Publish.
 
-## Can I connect a custom domain to my Lovable project?
+### Custom Domain
+You can connect a custom domain by navigating to Project > Settings > Domains and clicking Connect Domain.
 
-Yes, you can!
+Read more: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Manual Deployment
+The app can be deployed to any static hosting service:
+```bash
+npm run build
+# Deploy the 'dist' folder to your hosting provider
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
-# GitScroller
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Commit your changes**: `git commit -m 'Add amazing feature'`
+4. **Push to the branch**: `git push origin feature/amazing-feature`
+5. **Open a Pull Request**
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🙏 Acknowledgments
+
+- **GitHub API** for providing repository data
+- **shadcn/ui** for beautiful UI components
+- **Lucide** for the icon set
+- **Tailwind CSS** for the styling system
+
+---
+
+**Built with ❤️ for the developer community**
