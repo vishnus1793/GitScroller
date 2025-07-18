@@ -14,19 +14,11 @@ RepoReel is a modern, responsive web application that helps developers discover 
 - **⭐ Repository Cards**: Rich cards showing stars, forks, language, and description
 - **🚀 Fast Performance**: Optimized with caching and efficient API calls
 
-## 🎯 Live Demo
-
-**URL**: https://lovable.dev/projects/8ce5895f-014a-4dcf-9b00-6ac3a3dcaba5
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/8ce5895f-014a-4dcf-9b00-6ac3a3dcaba5) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
@@ -38,13 +30,13 @@ Follow these steps:
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+git clone https://github.com/vishnus1793/GitScroller.git
 
 # Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+cd GitScroller
 
 # Step 3: Install the necessary dependencies.
-npm i
+npm install 
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
