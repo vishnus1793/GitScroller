@@ -76,26 +76,6 @@ This project is built with modern web technologies:
 - Node.js (v16 or higher)
 - npm or yarn package manager
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <YOUR_GIT_URL>
-   cd <YOUR_PROJECT_NAME>
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:5173` to see the app in action!
 
 ## 📖 Usage
 
@@ -155,15 +135,6 @@ RepoReel integrates with the GitHub Search API to provide:
 - **Performance**: Optimized queries with pagination
 - **Real-time Data**: Fresh repository information
 
-## 🚀 Deployment
-
-### Quick Deploy with Lovable
-Simply open [Lovable](https://lovable.dev/projects/8ce5895f-014a-4dcf-9b00-6ac3a3dcaba5) and click on Share -> Publish.
-
-### Custom Domain
-You can connect a custom domain by navigating to Project > Settings > Domains and clicking Connect Domain.
-
-Read more: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
 
 ### Manual Deployment
 The app can be deployed to any static hosting service:
