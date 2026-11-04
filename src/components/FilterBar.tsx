@@ -32,6 +32,27 @@ const SORT_OPTIONS = [
   { value: 'created', label: 'Newest' },
 ];
 
+const MOBILE_LANGUAGE_LABELS: Record<string, string> = {
+  '': 'All',
+  JavaScript: 'JS',
+  TypeScript: 'TS',
+  Python: 'Py',
+  Java: 'Java',
+  Go: 'Go',
+  Rust: 'Rust',
+  'C++': 'C++',
+  Swift: 'Swift',
+  Kotlin: 'Kt',
+  PHP: 'PHP',
+};
+
+const MOBILE_SORT_LABELS: Record<string, string> = {
+  stars: 'Stars',
+  forks: 'Forks',
+  updated: 'New',
+  created: 'Fresh',
+};
+
 export const FilterBar = ({
   language,
   sortBy,
@@ -58,13 +79,13 @@ export const FilterBar = ({
         />
       </form>
       <label className="select-control language-select">
-        <span>Lang</span>
+        <span>{MOBILE_LANGUAGE_LABELS[language] ?? 'Lang'}</span>
         <select aria-label="Filter by language" value={language} onChange={(event) => onLanguageChange(event.target.value)}>
           {POPULAR_LANGUAGES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
         </select>
       </label>
       <label className="select-control sort-select">
-        <span>Sort</span>
+        <span>{MOBILE_SORT_LABELS[sortBy] ?? 'Sort'}</span>
         <select aria-label="Sort repositories" value={sortBy} onChange={(event) => onSortChange(event.target.value)}>
           {SORT_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
         </select>

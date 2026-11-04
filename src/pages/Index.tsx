@@ -14,6 +14,7 @@ import {
   Share2,
   Sparkles,
   Star,
+  UserRound,
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { FilterBar } from '@/components/FilterBar';
@@ -45,18 +46,24 @@ const Index = () => {
   const [captionExpanded, setCaptionExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const loadingMoreRef = useRef(false);
+  const loadMoreController = useRef<AbortController | null>(null);
   const transitionLock = useRef(false);
   const transitionTimer = useRef<number | null>(null);
   const wheelGestureActive = useRef(false);
   const wheelDelta = useRef(0);
   const wheelGestureTimer = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
+  const touchStart = useRef<{ x: number; y: number; time: number } | null>(null);
   const [transition, setTransition] = useState<{ fromIndex: number; direction: -1 | 1 } | null>(null);
   const { toast } = useToast();
   const activeRepo = repos[activeIndex];
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    loadMoreController.current?.abort();
+    loadMoreController.current = null;
+    loadingMoreRef.current = false;
+    setLoadingMore(false);
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
     transitionTimer.current = null;
     transitionLock.current = false;
@@ -74,6 +81,7 @@ const Index = () => {
       language,
       sort: sortBy,
       query: activeSearchQuery,
+      signal: controller.signal,
     })
       .then((items) => {
         if (cancelled) return;
@@ -90,12 +98,15 @@ const Index = () => {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [activeSearchQuery, language, reloadToken, sortBy]);
 
   const loadMore = useCallback(async () => {
     if (loadingMoreRef.current || !hasMore) return;
     loadingMoreRef.current = true;
+    const controller = new AbortController();
+    loadMoreController.current = controller;
     setLoadingMore(true);
     try {
       const items = await fetchTrendingRepos({
@@ -104,7 +115,9 @@ const Index = () => {
         language,
         sort: sortBy,
         query: activeSearchQuery,
+        signal: controller.signal,
       });
+      if (controller.signal.aborted) return;
       setRepos((current) => {
         const existingIds = new Set(current.map((repo) => repo.id));
         return [...current, ...items.filter((repo) => !existingIds.has(repo.id))];
@@ -112,14 +125,19 @@ const Index = () => {
       setNextPage((page) => page + 1);
       if (items.length === 0) setHasMore(false);
     } catch {
-      toast({
-        title: 'Could not load more repositories',
-        description: 'Check your connection and try again.',
-        variant: 'destructive',
-      });
+      if (!controller.signal.aborted) {
+        toast({
+          title: 'Could not load more repositories',
+          description: 'Check your connection and try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
-      loadingMoreRef.current = false;
-      setLoadingMore(false);
+      if (loadMoreController.current === controller) {
+        loadMoreController.current = null;
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
+      }
     }
   }, [activeSearchQuery, hasMore, language, nextPage, sortBy, toast]);
 
@@ -142,7 +160,7 @@ const Index = () => {
     setTransition({ fromIndex: activeIndex, direction });
     setCaptionExpanded(false);
     setActiveIndex(targetIndex);
-    const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 560;
+    const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 380;
     transitionTimer.current = window.setTimeout(() => {
       setTransition(null);
       transitionLock.current = false;
@@ -284,13 +302,17 @@ const Index = () => {
         </article>
 
         <aside className="action-rail" aria-label="Repository actions">
-          <button className={`action-button ${likedRepos.has(repo.id) && !isOutgoing ? 'is-liked' : ''}`} onClick={() => toggleLike(repo.id)} aria-label={likedRepos.has(repo.id) ? 'Unlike repository' : 'Like repository'}>
-            <span className="action-icon"><Heart size={23} fill={likedRepos.has(repo.id) && !isOutgoing ? 'currentColor' : 'none'} /></span>
+          <button className={`action-button star-action ${likedRepos.has(repo.id) && !isOutgoing ? 'is-liked' : ''}`} onClick={() => toggleLike(repo.id)} aria-label={likedRepos.has(repo.id) ? 'Unlike repository' : 'Like repository'}>
+            <span className="action-icon"><Heart className="desktop-heart-icon" size={23} fill={likedRepos.has(repo.id) && !isOutgoing ? 'currentColor' : 'none'} /><Star className="mobile-star-icon" size={23} fill={likedRepos.has(repo.id) && !isOutgoing ? 'currentColor' : 'none'} /></span>
             <span className="action-count">{formatCount(repo.stargazers_count + (likedRepos.has(repo.id) ? 1 : 0))}</span>
           </button>
-          <a className="action-button" href={`${repo.html_url}/issues`} target="_blank" rel="noopener noreferrer" aria-label="View repository issues">
+          <a className="action-button issues-action" href={`${repo.html_url}/issues`} target="_blank" rel="noopener noreferrer" aria-label="View repository issues">
             <span className="action-icon"><MessageCircle size={23} /></span>
             <span className="action-count">{formatCount(repo.open_issues_count)}</span>
+          </a>
+          <a className="action-button fork-action" href={`${repo.html_url}/fork`} target="_blank" rel="noopener noreferrer" aria-label="Fork repository">
+            <span className="action-icon"><GitFork size={22} /></span>
+            <span className="action-count">{formatCount(repo.forks_count)}</span>
           </a>
           <button className="action-button" onClick={() => void shareRepo(repo)} aria-label="Share repository">
             <span className="action-icon">{copied && !isOutgoing ? <Check size={22} /> : <Share2 size={22} />}</span>
@@ -303,6 +325,10 @@ const Index = () => {
           <a className="action-button" href={repo.html_url} target="_blank" rel="noopener noreferrer" aria-label="More about this repository">
             <span className="action-icon"><MoreHorizontal size={23} /></span>
             <span className="action-count">More</span>
+          </a>
+          <a className="action-button owner-action" href={repo.owner.html_url} target="_blank" rel="noopener noreferrer" aria-label={`View ${repo.owner.login}'s profile`}>
+            <span className="action-icon"><UserRound size={21} /></span>
+            <span className="action-count">Profile</span>
           </a>
           <div className="repo-stats">
             <Star size={13} fill="currentColor" />
@@ -318,18 +344,23 @@ const Index = () => {
   const handleWheel = (event: React.WheelEvent<HTMLElement>) => {
     if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"]')) return;
     if (wheelGestureTimer.current !== null) window.clearTimeout(wheelGestureTimer.current);
-    wheelGestureTimer.current = window.setTimeout(() => {
-      wheelGestureActive.current = false;
-      wheelDelta.current = 0;
-      wheelGestureTimer.current = null;
-    }, 180);
+    const resetWheelGesture = (delay: number) => {
+      wheelGestureTimer.current = window.setTimeout(() => {
+        wheelGestureActive.current = false;
+        wheelDelta.current = 0;
+        wheelGestureTimer.current = null;
+      }, delay);
+    };
+    resetWheelGesture(wheelGestureActive.current ? 300 : 110);
     if (wheelGestureActive.current) return;
 
     const delta = event.deltaY * (event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? window.innerHeight : 1);
     if (Math.sign(delta) !== Math.sign(wheelDelta.current)) wheelDelta.current = 0;
     wheelDelta.current += delta;
-    if (Math.abs(wheelDelta.current) < 36) return;
+    if (Math.abs(wheelDelta.current) < 32) return;
     wheelGestureActive.current = true;
+    if (wheelGestureTimer.current !== null) window.clearTimeout(wheelGestureTimer.current);
+    resetWheelGesture(300);
     const direction = wheelDelta.current > 0 ? 1 : -1;
     wheelDelta.current = 0;
     moveReel(direction);
@@ -337,21 +368,30 @@ const Index = () => {
 
   const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
     if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"]')) {
-      touchStartY.current = null;
+      touchStart.current = null;
       return;
     }
-    touchStartY.current = event.touches[0]?.clientY ?? null;
+    const touch = event.touches[0];
+    touchStart.current = touch ? { x: touch.clientX, y: touch.clientY, time: performance.now() } : null;
   };
 
   const handleTouchEnd = (event: React.TouchEvent<HTMLElement>) => {
-    if (touchStartY.current === null) return;
+    if (!touchStart.current) return;
     if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"]')) {
-      touchStartY.current = null;
+      touchStart.current = null;
       return;
     }
-    const delta = touchStartY.current - (event.changedTouches[0]?.clientY ?? touchStartY.current);
-    if (Math.abs(delta) > 48) moveReel(delta > 0 ? 1 : -1);
-    touchStartY.current = null;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    const deltaY = touchStart.current.y - touch.clientY;
+    const deltaX = touch.clientX - touchStart.current.x;
+    const elapsed = Math.max(performance.now() - touchStart.current.time, 1);
+    const velocityY = Math.abs(deltaY) / elapsed;
+    const isVerticalGesture = Math.abs(deltaY) > Math.abs(deltaX) * 1.2;
+    if (isVerticalGesture && (Math.abs(deltaY) >= 42 || (Math.abs(deltaY) >= 18 && velocityY >= 0.4))) {
+      moveReel(deltaY > 0 ? 1 : -1);
+    }
+    touchStart.current = null;
   };
 
   const handleSearchSubmit = () => {

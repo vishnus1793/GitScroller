@@ -14,7 +14,8 @@ export const fetchTrendingRepos = async (params: FetchReposParams = {}): Promise
     language = '',
     sort = 'stars',
     order = 'desc',
-    query: searchQuery = ''
+    query: searchQuery = '',
+    signal,
   } = params;
 
   // Create cache key
@@ -61,6 +62,7 @@ export const fetchTrendingRepos = async (params: FetchReposParams = {}): Promise
 
   try {
     const response = await fetch(url.toString(), {
+      signal,
       headers: {
         'Accept': 'application/vnd.github.v3+json',
         'User-Agent': 'RepoReel-App'
@@ -84,7 +86,9 @@ export const fetchTrendingRepos = async (params: FetchReposParams = {}): Promise
 
     return data.items;
   } catch (error) {
-    console.error('Error fetching repositories:', error);
+    if (!(error instanceof DOMException && error.name === 'AbortError')) {
+      console.error('Error fetching repositories:', error);
+    }
     throw error;
   }
 };

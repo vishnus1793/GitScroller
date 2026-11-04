@@ -33,4 +33,5 @@ export interface FetchReposParams {
   sort?: string;
   order?: 'asc' | 'desc';
   query?: string;
+  signal?: AbortSignal;
 }
