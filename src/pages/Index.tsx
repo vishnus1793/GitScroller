@@ -5,9 +5,11 @@ import {
   Bookmark,
   Check,
   Code2,
+  Compass,
   ExternalLink,
   GitFork,
   Heart,
+  House,
   MessageCircle,
   MoreHorizontal,
   Search,
@@ -15,6 +17,7 @@ import {
   Sparkles,
   Star,
   UserRound,
+  X,
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { FilterBar } from '@/components/FilterBar';
@@ -45,6 +48,9 @@ const Index = () => {
   const [savedRepos, setSavedRepos] = useState<Set<number>>(() => new Set());
   const [captionExpanded, setCaptionExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [savedPanelOpen, setSavedPanelOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'home' | 'saved' | 'search' | 'discover' | 'profile'>('home');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const loadingMoreRef = useRef(false);
   const loadMoreController = useRef<AbortController | null>(null);
   const transitionLock = useRef(false);
@@ -56,6 +62,10 @@ const Index = () => {
   const [transition, setTransition] = useState<{ fromIndex: number; direction: -1 | 1 } | null>(null);
   const { toast } = useToast();
   const activeRepo = repos[activeIndex];
+  const savedRepositoryIndices = repos.reduce<number[]>((indices, repo, index) => {
+    if (savedRepos.has(repo.id)) indices.push(index);
+    return indices;
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,6 +185,10 @@ const Index = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSavedPanelOpen(false);
+        return;
+      }
       if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"]')) return;
       if (event.key === 'ArrowDown' || event.key === 'PageDown') {
         event.preventDefault();
@@ -314,15 +328,15 @@ const Index = () => {
             <span className="action-icon"><GitFork size={22} /></span>
             <span className="action-count">{formatCount(repo.forks_count)}</span>
           </a>
-          <button className="action-button" onClick={() => void shareRepo(repo)} aria-label="Share repository">
+          <button className="action-button share-action" onClick={() => void shareRepo(repo)} aria-label="Share repository">
             <span className="action-icon">{copied && !isOutgoing ? <Check size={22} /> : <Share2 size={22} />}</span>
             <span className="action-count">{copied && !isOutgoing ? 'Copied' : 'Share'}</span>
           </button>
-          <button className={`action-button ${savedRepos.has(repo.id) && !isOutgoing ? 'is-saved' : ''}`} onClick={() => toggleSave(repo.id)} aria-label={savedRepos.has(repo.id) ? 'Remove bookmark' : 'Bookmark repository'}>
+          <button className={`action-button bookmark-action ${savedRepos.has(repo.id) && !isOutgoing ? 'is-saved' : ''}`} onClick={() => toggleSave(repo.id)} aria-label={savedRepos.has(repo.id) ? 'Remove bookmark' : 'Bookmark repository'}>
             <span className="action-icon"><Bookmark size={22} fill={savedRepos.has(repo.id) && !isOutgoing ? 'currentColor' : 'none'} /></span>
             <span className="action-count">{savedRepos.has(repo.id) && !isOutgoing ? 'Saved' : 'Save'}</span>
           </button>
-          <a className="action-button" href={repo.html_url} target="_blank" rel="noopener noreferrer" aria-label="More about this repository">
+          <a className="action-button more-action" href={repo.html_url} target="_blank" rel="noopener noreferrer" aria-label="More about this repository">
             <span className="action-icon"><MoreHorizontal size={23} /></span>
             <span className="action-count">More</span>
           </a>
@@ -342,7 +356,7 @@ const Index = () => {
   };
 
   const handleWheel = (event: React.WheelEvent<HTMLElement>) => {
-    if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"]')) return;
+    if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"], .saved-panel')) return;
     if (wheelGestureTimer.current !== null) window.clearTimeout(wheelGestureTimer.current);
     const resetWheelGesture = (delay: number) => {
       wheelGestureTimer.current = window.setTimeout(() => {
@@ -367,7 +381,7 @@ const Index = () => {
   };
 
   const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
-    if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"]')) {
+    if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"], .saved-panel')) {
       touchStart.current = null;
       return;
     }
@@ -377,7 +391,7 @@ const Index = () => {
 
   const handleTouchEnd = (event: React.TouchEvent<HTMLElement>) => {
     if (!touchStart.current) return;
-    if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"]')) {
+    if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, [contenteditable="true"], .saved-panel')) {
       touchStart.current = null;
       return;
     }
@@ -421,6 +435,7 @@ const Index = () => {
             onSortChange={setSortBy}
             onSearchChange={setSearchQuery}
             onSearchSubmit={handleSearchSubmit}
+            searchInputRef={searchInputRef}
           />
         </div>
       </header>
@@ -454,6 +469,66 @@ const Index = () => {
         <span className="footer-line" />
         <span>{loadingMore ? 'Finding more projects…' : 'Made for the curious'}</span>
       </footer>
+
+      <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
+        <button className={`mobile-nav-item ${mobileTab === 'home' ? 'is-current' : ''}`} onClick={() => { setMobileTab('home'); setSavedPanelOpen(false); setActiveIndex(0); }} aria-label="Home">
+          <House size={19} />
+          <span>Home</span>
+        </button>
+        <button className={`mobile-nav-item ${mobileTab === 'saved' ? 'is-current' : ''}`} onClick={() => { setMobileTab('saved'); setSavedPanelOpen(true); }} aria-label="Saved repositories">
+          <Bookmark size={19} />
+          <span>Saved</span>
+        </button>
+        <button className={`mobile-nav-item ${mobileTab === 'search' ? 'is-current' : ''}`} onClick={() => { setMobileTab('search'); searchInputRef.current?.focus(); }} aria-label="Search repositories">
+          <Search size={19} />
+          <span>Search</span>
+        </button>
+        <button className={`mobile-nav-item ${mobileTab === 'discover' ? 'is-current' : ''}`} onClick={() => { setMobileTab('discover'); setSavedPanelOpen(false); setActiveIndex(0); }} aria-label="Discover repositories">
+          <Compass size={19} />
+          <span>Discover</span>
+        </button>
+        <a className={`mobile-nav-item ${mobileTab === 'profile' ? 'is-current' : ''}`} href={activeRepo?.owner.html_url ?? 'https://github.com'} target="_blank" rel="noopener noreferrer" aria-label="Owner profile" onClick={() => setMobileTab('profile')}>
+          <UserRound size={19} />
+          <span>Profile</span>
+        </a>
+      </nav>
+
+      {savedPanelOpen && (
+        <div className="saved-panel-backdrop" onClick={() => setSavedPanelOpen(false)}>
+          <section className="saved-panel" role="dialog" aria-modal="true" aria-labelledby="saved-panel-title" onClick={(event) => event.stopPropagation()}>
+            <div className="saved-panel-heading">
+              <div>
+                <span className="saved-panel-eyebrow">YOUR COLLECTION</span>
+                <h2 id="saved-panel-title">Saved repositories</h2>
+              </div>
+              <button onClick={() => setSavedPanelOpen(false)} aria-label="Close saved repositories"><X size={20} /></button>
+            </div>
+            {savedRepositoryIndices.length ? (
+              <div className="saved-repo-list">
+                {savedRepositoryIndices.map((index) => {
+                  const repo = repos[index];
+                  return (
+                    <button
+                      className="saved-repo-item"
+                      key={repo.id}
+                      onClick={() => {
+                        setActiveIndex(index);
+                        setSavedPanelOpen(false);
+                      }}
+                    >
+                      <img src={repo.owner.avatar_url} alt="" loading="lazy" />
+                      <span><strong>{repo.full_name}</strong><small>{repo.description || 'No description available'}</small></span>
+                      <Star size={15} />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="saved-empty">Tap the bookmark on a repository to keep it here.</p>
+            )}
+          </section>
+        </div>
+      )}
     </main>
   );
 };

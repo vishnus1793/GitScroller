@@ -1,4 +1,4 @@
-import { FormEvent } from 'react';
+import { FormEvent, Ref } from 'react';
 import { Search } from 'lucide-react';
 
 interface FilterBarProps {
@@ -9,6 +9,7 @@ interface FilterBarProps {
   onSortChange: (sort: string) => void;
   onSearchChange: (query: string) => void;
   onSearchSubmit: () => void;
+  searchInputRef?: Ref<HTMLInputElement>;
 }
 
 const POPULAR_LANGUAGES = [
@@ -61,6 +62,7 @@ export const FilterBar = ({
   onSortChange,
   onSearchChange,
   onSearchSubmit,
+  searchInputRef,
 }: FilterBarProps) => {
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -72,6 +74,7 @@ export const FilterBar = ({
       <form className="search-control" onSubmit={submitSearch}>
         <Search size={15} aria-hidden="true" />
         <input
+          ref={searchInputRef}
           aria-label="Search repositories"
           placeholder="Search repos"
           value={searchQuery}
